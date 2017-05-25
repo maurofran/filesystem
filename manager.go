@@ -34,7 +34,7 @@ type Write interface {
 	// WriteStream will write the content of provided reader at supplied path, creating the file.
 	WriteStream(path Path, r io.Reader) error
 	// Deletes a file at provided path.
-	Delete(path Path) error
+	Delete(path Path) (bool, error)
 	// ReadAndDelete will read the file at provided path and delete after read.
 	ReadAndDelete(path Path) (string, error)
 	// Move the file at supplied path to new path.

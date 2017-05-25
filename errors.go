@@ -94,3 +94,14 @@ func mountNotFoundError(prefix string) MountError {
 func mountExistsError(prefix string) MountError {
 	return mountError{"Mount prefix %s already exists", prefix}
 }
+
+// FileNotFoundError is the error raised when a file was not found.
+type FileNotFoundError interface {
+	Path() Path
+}
+
+// IsFileNotFound will check if file is not found
+func IsFileNotFound(err error) bool {
+	_, ok := err.(FileNotFoundError)
+	return ok
+}

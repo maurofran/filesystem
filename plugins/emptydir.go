@@ -33,7 +33,8 @@ func (p *EmptyDir) Handle(args ...interface{}) (interface{}, error) {
 				return nil, err
 			}
 		} else {
-			if err := p.fs.Delete(itemPath); err != nil {
+			_, err := p.fs.Delete(itemPath)
+			if err != nil {
 				return nil, err
 			}
 		}

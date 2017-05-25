@@ -149,10 +149,10 @@ func (mm *mountManager) PutStream(path Path, r io.Reader) error {
 }
 
 // Deletes a file at provided path.
-func (mm *mountManager) Delete(path Path) error {
+func (mm *mountManager) Delete(path Path) (bool, error) {
 	mgr, subPath, err := mm.managerFor(path)
 	if err != nil {
-		return err
+		return false, err
 	}
 	return mgr.Delete(subPath)
 }
@@ -189,7 +189,8 @@ func (mm *mountManager) Move(path, newpath Path) error {
 	if err != nil {
 		return err
 	}
-	return mgr1.Delete(subPath1)
+	_, err = mgr1.Delete(subPath1)
+	return err
 }
 
 // Copy the file at supplied path to new path.
