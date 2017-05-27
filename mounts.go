@@ -13,7 +13,7 @@ func splitPath(path Path) (string, Path, error) {
 		return "", "", err
 	}
 	if !match {
-		return "", "", invalidPathError(path)
+		return "", "", nil //invalidPathError(path)
 	}
 	idx := strings.Index(string(path), "://")
 	prefix := string(path[:idx])
@@ -41,7 +41,7 @@ func EmptyMountManager() MountManager {
 
 func (mm *mountManager) Mount(prefix string, mgr Interface) error {
 	if _, ok := mm.managers[prefix]; ok {
-		return mountExistsError(prefix)
+		return nil //mountExistsError(prefix)
 	}
 	mm.managers[prefix] = mgr
 	return nil
@@ -49,7 +49,7 @@ func (mm *mountManager) Mount(prefix string, mgr Interface) error {
 
 func (mm *mountManager) Unmount(prefix string) error {
 	if _, ok := mm.managers[prefix]; !ok {
-		return mountNotFoundError(prefix)
+		return nil //mountNotFoundError(prefix)
 	}
 	delete(mm.managers, prefix)
 	return nil
@@ -62,7 +62,7 @@ func (mm *mountManager) managerFor(path Path) (Interface, Path, error) {
 	}
 	mgr, ok := mm.managers[prefix]
 	if !ok {
-		return nil, "", mountNotFoundError(prefix)
+		return nil, "", nil //mountNotFoundError(prefix)
 	}
 	return mgr, subPath, nil
 }
