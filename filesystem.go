@@ -78,7 +78,8 @@ func (fs *filesystem) Adapter() Adapter {
 
 // Has will check if a file exists.
 func (fs *filesystem) Has(path Path) (bool, error) {
-	if path, err := normalizePath(path); err != nil {
+	path, err := normalizePath(path)
+	if err != nil {
 		return false, err
 	}
 	if path == emptyPath {
@@ -90,7 +91,8 @@ func (fs *filesystem) Has(path Path) (bool, error) {
 
 // Read the file at provided path.
 func (fs *filesystem) Read(path Path) (string, error) {
-	if path, err := normalizePath(path); err != nil {
+	path, err := normalizePath(path)
+	if err != nil {
 		return "", err
 	}
 	meta, err := fs.Adapter().Read(path)
@@ -102,7 +104,8 @@ func (fs *filesystem) Read(path Path) (string, error) {
 
 // ReadStream will read the file at provided path as a stream.
 func (fs *filesystem) ReadStream(path Path) (io.ReadCloser, error) {
-	if path, err := normalizePath(path); err != nil {
+	path, err := normalizePath(path)
+	if err != nil {
 		return nil, err
 	}
 	meta, err := fs.Adapter().ReadStream(path)
@@ -114,7 +117,8 @@ func (fs *filesystem) ReadStream(path Path) (io.ReadCloser, error) {
 
 // GetMimeType will retrieve the mime type of file at supplied path.
 func (fs *filesystem) GetMimeType(path Path) (string, error) {
-	if path, err := normalizePath(path); err != nil {
+	path, err := normalizePath(path)
+	if err != nil {
 		return "", err
 	}
 	meta, err := fs.Adapter().GetMetadata(path)
@@ -126,7 +130,8 @@ func (fs *filesystem) GetMimeType(path Path) (string, error) {
 
 // GetTimestamp will retrieve the timestamp of file at supplied path.
 func (fs *filesystem) GetTimestamp(path Path) (time.Time, error) {
-	if path, err := normalizePath(path); err != nil {
+	path, err := normalizePath(path)
+	if err != nil {
 		return time.Now(), err
 	}
 	meta, err := fs.Adapter().GetMetadata(path)
@@ -138,7 +143,8 @@ func (fs *filesystem) GetTimestamp(path Path) (time.Time, error) {
 
 // GetFileSize will retrieve the size of file at supplied path.
 func (fs *filesystem) GetFileSize(path Path) (int64, error) {
-	if path, err := normalizePath(path); err != nil {
+	path, err := normalizePath(path)
+	if err != nil {
 		return 0, err
 	}
 	meta, err := fs.Adapter().GetMetadata(path)
@@ -150,7 +156,8 @@ func (fs *filesystem) GetFileSize(path Path) (int64, error) {
 
 // GetMetadata will retrieve the metadata of file at supplied path.
 func (fs *filesystem) GetMetadata(path Path) (Metadata, error) {
-	if path, err := normalizePath(path); err != nil {
+	path, err := normalizePath(path)
+	if err != nil {
 		return nil, err
 	}
 	return fs.Adapter().GetMetadata(path)
@@ -158,7 +165,8 @@ func (fs *filesystem) GetMetadata(path Path) (Metadata, error) {
 
 // Get the visibility of file at supplied path.
 func (fs *filesystem) GetVisibility(path Path) (Visibility, error) {
-	if path, err := normalizePath(path); err != nil {
+	path, err := normalizePath(path)
+	if err != nil {
 		return Visibility(0), err
 	}
 	meta, err := fs.Adapter().GetMetadata(path)
@@ -170,7 +178,8 @@ func (fs *filesystem) GetVisibility(path Path) (Visibility, error) {
 
 // List the contents of given path.
 func (fs *filesystem) ListContents(path Path, recursive bool) ([]Metadata, error) {
-	if path, err := normalizePath(path); err != nil {
+	path, err := normalizePath(path)
+	if err != nil {
 		return nil, err
 	}
 	// TODO ContentListFormatter????
@@ -179,7 +188,8 @@ func (fs *filesystem) ListContents(path Path, recursive bool) ([]Metadata, error
 
 // Write the supplied content at supplied path, creating the file.
 func (fs *filesystem) Write(path Path, content string, config map[string]interface{}) error {
-	if path, err := normalizePath(path); err != nil {
+	path, err := normalizePath(path)
+	if err != nil {
 		return err
 	}
 	if err := fs.assertAbsent(path); err != nil {
@@ -190,7 +200,8 @@ func (fs *filesystem) Write(path Path, content string, config map[string]interfa
 
 // WriteStream will write the content of provided reader at supplied path, creating the file.
 func (fs *filesystem) WriteStream(path Path, r io.Reader, config map[string]interface{}) error {
-	if path, err := normalizePath(path); err != nil {
+	path, err := normalizePath(path)
+	if err != nil {
 		return err
 	}
 	if err := fs.assertAbsent(path); err != nil {
@@ -201,7 +212,8 @@ func (fs *filesystem) WriteStream(path Path, r io.Reader, config map[string]inte
 
 // Deletes a file at provided path.
 func (fs *filesystem) Delete(path Path) (bool, error) {
-	if path, err := normalizePath(path); err != nil {
+	path, err := normalizePath(path)
+	if err != nil {
 		return false, err
 	}
 	if err := fs.assertPresent(path); err != nil {
@@ -212,7 +224,8 @@ func (fs *filesystem) Delete(path Path) (bool, error) {
 
 // ReadAndDelete will read the file at provided path and delete after read.
 func (fs *filesystem) ReadAndDelete(path Path) (string, error) {
-	if path, err := normalizePath(path); err != nil {
+	path, err := normalizePath(path)
+	if err != nil {
 		return "", err
 	}
 	if err := fs.assertPresent(path); err != nil {
@@ -230,10 +243,12 @@ func (fs *filesystem) ReadAndDelete(path Path) (string, error) {
 
 // Move the file at supplied path to new path.
 func (fs *filesystem) Move(path, newpath Path) error {
-	if path, err := normalizePath(path); err != nil {
+	path, err := normalizePath(path)
+	if err != nil {
 		return err
 	}
-	if newpath, err := normalizePath(newpath); err != nil {
+	newpath, err = normalizePath(newpath)
+	if err != nil {
 		return err
 	}
 	if err := fs.assertPresent(path); err != nil {
@@ -247,10 +262,12 @@ func (fs *filesystem) Move(path, newpath Path) error {
 
 // Copy the file at supplied path to new path.
 func (fs *filesystem) Copy(path, newpath Path) error {
-	if path, err := normalizePath(path); err != nil {
+	path, err := normalizePath(path)
+	if err != nil {
 		return err
 	}
-	if newpath, err := normalizePath(newpath); err != nil {
+	newpath, err = normalizePath(newpath)
+	if err != nil {
 		return err
 	}
 	if err := fs.assertPresent(path); err != nil {
@@ -264,7 +281,8 @@ func (fs *filesystem) Copy(path, newpath Path) error {
 
 // CreateDir will create a new directory at provided path.
 func (fs *filesystem) CreateDir(path Path, config map[string]interface{}) error {
-	if path, err := normalizePath(path); err != nil {
+	path, err := normalizePath(path)
+	if err != nil {
 		return err
 	}
 	return fs.Adapter().CreateDir(path, fs.PrepareConfig(config))
@@ -272,7 +290,8 @@ func (fs *filesystem) CreateDir(path Path, config map[string]interface{}) error 
 
 // DeleteDir will delete the directory at provided path.
 func (fs *filesystem) DeleteDir(path Path) error {
-	if path, err := normalizePath(path); err != nil {
+	path, err := normalizePath(path)
+	if err != nil {
 		return err
 	}
 	if path == emptyPath {
@@ -283,7 +302,8 @@ func (fs *filesystem) DeleteDir(path Path) error {
 
 // Set the visibility of file at supplied path.
 func (fs *filesystem) SetVisibility(path Path, v Visibility) error {
-	if path, err := normalizePath(path); err != nil {
+	path, err := normalizePath(path)
+	if err != nil {
 		return err
 	}
 	if err := fs.assertPresent(path); err != nil {
@@ -294,7 +314,8 @@ func (fs *filesystem) SetVisibility(path Path, v Visibility) error {
 
 // Update the supplied content at supplied path, returning an error if file does not exists.
 func (fs *filesystem) Update(path Path, content string, config map[string]interface{}) error {
-	if path, err := normalizePath(path); err != nil {
+	path, err := normalizePath(path)
+	if err != nil {
 		return err
 	}
 	if err := fs.assertPresent(path); err != nil {
@@ -305,7 +326,8 @@ func (fs *filesystem) Update(path Path, content string, config map[string]interf
 
 // Update with the content of supplied reader at supplied path, returning an error if file does not exists
 func (fs *filesystem) UpdateStream(path Path, r io.Reader, config map[string]interface{}) error {
-	if path, err := normalizePath(path); err != nil {
+	path, err := normalizePath(path)
+	if err != nil {
 		return err
 	}
 	if err := fs.assertPresent(path); err != nil {
@@ -316,7 +338,8 @@ func (fs *filesystem) UpdateStream(path Path, r io.Reader, config map[string]int
 
 // Put the supplied content at supplied path, creating the file if does not exists.
 func (fs *filesystem) Put(path Path, content string, config map[string]interface{}) error {
-	if path, err := normalizePath(path); err != nil {
+	path, err := normalizePath(path)
+	if err != nil {
 		return err
 	}
 	cfg := fs.PrepareConfig(config)
@@ -333,7 +356,8 @@ func (fs *filesystem) Put(path Path, content string, config map[string]interface
 
 // Puth the content of supplied reader at supplied path, creating the file if does not exists.
 func (fs *filesystem) PutStream(path Path, r io.Reader, config map[string]interface{}) error {
-	if path, err := normalizePath(path); err != nil {
+	path, err := normalizePath(path)
+	if err != nil {
 		return err
 	}
 	cfg := fs.PrepareConfig(config)

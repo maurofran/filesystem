@@ -1,6 +1,7 @@
 package filesystem
 
 import (
+	"fmt"
 	"io"
 	"regexp"
 	"strings"
@@ -13,7 +14,7 @@ func splitPath(path Path) (string, Path, error) {
 		return "", "", err
 	}
 	if !match {
-		return "", "", nil //invalidPathError(path)
+		return "", "", fmt.Errorf("Invalid path provided: %s", path)
 	}
 	idx := strings.Index(string(path), "://")
 	prefix := string(path[:idx])
@@ -39,9 +40,18 @@ func EmptyMountManager() MountManager {
 	return &mountManager{}
 }
 
+// NewMountManager will create new mount manager initialized with provided file systems.
+func NewMountManager(fs map[string]Interface) MountManager {
+	mm := new(mountManager)
+	for prefix, fs := range fs {
+		mm.Mount(prefix, fs)
+	}
+	return mm
+}
+
 func (mm *mountManager) Mount(prefix string, mgr Interface) error {
 	if _, ok := mm.managers[prefix]; ok {
-		return nil //mountExistsError(prefix)
+		return fmt.Errorf("Mount already exists: %s", prefix)
 	}
 	mm.managers[prefix] = mgr
 	return nil
@@ -49,7 +59,7 @@ func (mm *mountManager) Mount(prefix string, mgr Interface) error {
 
 func (mm *mountManager) Unmount(prefix string) error {
 	if _, ok := mm.managers[prefix]; !ok {
-		return nil //mountNotFoundError(prefix)
+		return fmt.Errorf("No mount found for prefix: %s", prefix)
 	}
 	delete(mm.managers, prefix)
 	return nil
@@ -62,7 +72,7 @@ func (mm *mountManager) managerFor(path Path) (Interface, Path, error) {
 	}
 	mgr, ok := mm.managers[prefix]
 	if !ok {
-		return nil, "", nil //mountNotFoundError(prefix)
+		return nil, "", fmt.Errorf("No mount found for prefix: %s", prefix)
 	}
 	return mgr, subPath, nil
 }
@@ -95,57 +105,57 @@ func (mm *mountManager) ReadStream(path Path) (io.ReadCloser, error) {
 }
 
 // Write the supplied content at supplied path, creating the file.
-func (mm *mountManager) Write(path Path, content string) error {
+func (mm *mountManager) Write(path Path, content string, config map[string]interface{}) error {
 	mgr, subPath, err := mm.managerFor(path)
 	if err != nil {
 		return err
 	}
-	return mgr.Write(subPath, content)
+	return mgr.Write(subPath, content, config)
 }
 
 // WriteStream will write the content of provided reader at supplied path, creating the file.
-func (mm *mountManager) WriteStream(path Path, r io.Reader) error {
+func (mm *mountManager) WriteStream(path Path, r io.Reader, config map[string]interface{}) error {
 	mgr, subPath, err := mm.managerFor(path)
 	if err != nil {
 		return err
 	}
-	return mgr.WriteStream(subPath, r)
+	return mgr.WriteStream(subPath, r, config)
 }
 
 // Update the supplied content at supplied path, returning an error if file does not exists.
-func (mm *mountManager) Update(path Path, content string) error {
+func (mm *mountManager) Update(path Path, content string, config map[string]interface{}) error {
 	mgr, subPath, err := mm.managerFor(path)
 	if err != nil {
 		return err
 	}
-	return mgr.Update(subPath, content)
+	return mgr.Update(subPath, content, config)
 }
 
 // Update with the content of supplied reader at supplied path, returning an error if file does not exists
-func (mm *mountManager) UpdateStream(path Path, r io.Reader) error {
+func (mm *mountManager) UpdateStream(path Path, r io.Reader, config map[string]interface{}) error {
 	mgr, subPath, err := mm.managerFor(path)
 	if err != nil {
 		return err
 	}
-	return mgr.UpdateStream(subPath, r)
+	return mgr.UpdateStream(subPath, r, config)
 }
 
 // Put the supplied content at supplied path, creating the file if does not exists.
-func (mm *mountManager) Put(path Path, content string) error {
+func (mm *mountManager) Put(path Path, content string, config map[string]interface{}) error {
 	mgr, subPath, err := mm.managerFor(path)
 	if err != nil {
 		return err
 	}
-	return mgr.Put(subPath, content)
+	return mgr.Put(subPath, content, config)
 }
 
 // Puth the content of supplied reader at supplied path, creating the file if does not exists.
-func (mm *mountManager) PutStream(path Path, r io.Reader) error {
+func (mm *mountManager) PutStream(path Path, r io.Reader, config map[string]interface{}) error {
 	mgr, subPath, err := mm.managerFor(path)
 	if err != nil {
 		return err
 	}
-	return mgr.PutStream(subPath, r)
+	return mgr.PutStream(subPath, r, config)
 }
 
 // Deletes a file at provided path.
@@ -185,7 +195,7 @@ func (mm *mountManager) Move(path, newpath Path) error {
 	if err != nil {
 		return err
 	}
-	err = mgr2.WriteStream(subPath2, source)
+	err = mgr2.WriteStream(subPath2, source, nil)
 	if err != nil {
 		return err
 	}
@@ -211,7 +221,7 @@ func (mm *mountManager) Copy(path, newpath Path) error {
 	if err != nil {
 		return err
 	}
-	return mgr2.WriteStream(subPath2, source)
+	return mgr2.WriteStream(subPath2, source, nil)
 }
 
 // GetMimeType will retrieve the mime type of file at supplied path.
@@ -251,12 +261,12 @@ func (mm *mountManager) GetMetadata(path Path) (Metadata, error) {
 }
 
 // CreateDir will create a new directory at provided path.
-func (mm *mountManager) CreateDir(path Path) error {
+func (mm *mountManager) CreateDir(path Path, config map[string]interface{}) error {
 	mgr, subPath, err := mm.managerFor(path)
 	if err != nil {
 		return err
 	}
-	return mgr.CreateDir(subPath)
+	return mgr.CreateDir(subPath, config)
 }
 
 // DeleteDir will delete the directory at provided path.
